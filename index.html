@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>movies</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>  
+</div>
+  <section class="sec1">
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                
+            </div>
+            <div class="col-6">
+</div>
+<section class="sec2">
+            </div>
+        <div class="col">
+            <div class="container-fluid m-3">
+                <form class="d-flex m-3" role="search" onsubmit="event.preventDefault(); searchBar()">
+                    <input id="search-input" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit" onclick="searchBar()">Search</button>
+                </form>
+        </div>
+<div class="container mt-5">
+  <div class="row" id="movieContainer"></div>
+</div>
+    </div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  const apiKey = 'b17792d141bf13344ce9e8eb45a68c81';
+  const apiUrl = 'https://api.themoviedb.org/3';
+  
+  async function fetchPopularMovies() {
+    const response = await fetch(`${apiUrl}/movie/popular?api_key=${apiKey}`);
+    const data = await response.json();
+    return data.results;
+  }
+
+  async function fetchMoviesBySearch(query) {
+    const response = await fetch(`${apiUrl}/search/movie?api_key=${apiKey}&query=${query}`);
+    const data = await response.json();
+    return data.results;
+  }
+
+  async function displayMovies(movies) {
+    const movieContainer = document.getElementById('movieContainer');
+    movieContainer.innerHTML = '';
+
+    movies.forEach(movie => {
+      const card = document.createElement('div');
+      card.className = 'col-md-4 mb-4';
+
+      card.innerHTML = `
+        <div class="card">
+          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" class="card-img-top" alt="${movie.title}">
+          <div class="card-body">
+            <h5 class="card-title">${movie.title}</h5>
+            <p class="card-text" style="display:none;" id="details_${movie.id}">
+              <strong>Title:</strong> ${movie.title}<br>
+              <strong>Overview:</strong> ${movie.overview}<br>
+              <strong>Release Date:</strong> ${movie.release_date}<br>
+              <strong>Vote Average:</strong> ${movie.vote_average}
+            </p>
+            <a href="#" class="btn btn-primary" onclick="toggleDetails(${movie.id})">Details</a>
+          </div>
+        </div>
+      `;
+
+      movieContainer.appendChild(card);
+    });
+  }
+
+  async function searchMovies(event) {
+    event.preventDefault();
+    const searchInput = document.getElementById('searchInput');
+    const query = searchInput.value.trim();
+
+    if (query !== '') {
+      const movies = await fetchMoviesBySearch(query);
+      displayMovies(movies);
+    } else {
+      // If the search input is empty, display popular movies
+      const popularMovies = await fetchPopularMovies();
+      displayMovies(popularMovies);
+    }
+  }
+
+  function toggleDetails(movieId) {
+    const detailsElement = document.getElementById(`details_${movieId}`);
+    
+    if (detailsElement.style.display === 'none' || detailsElement.style.display === '') {
+      detailsElement.style.display = 'block';
+    } else {
+      detailsElement.style.display = 'none';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    // Display popular movies on initial page load
+    const popularMovies = await fetchPopularMovies();
+    displayMovies(popularMovies);
+  });
+</script>
+</body>
+</html>
